@@ -1,0 +1,19 @@
+{
+  "name": "iot-backend-service",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "IoT 物联网云平台 mock 后端服务",
+  "scripts": {
+    "start": "node app.js",
+    "test": "vitest --run"
+  },
+  "dependencies": {
+    "express": "^4.21.0",
+    "cors": "^2.8.5"
+  },
+  "devDependencies": {
+    "vitest": "^1.6.0",
+    "supertest": "^6.3.4",
+    "fast-check": "^3.19.0"
+  }
+}
