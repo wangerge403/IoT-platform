@@ -2,6 +2,14 @@
 
 IoT 智慧物联网云平台，基于 Vue 3 + Element Plus 前端 和 Node.js + Express 后端的全栈项目。
 
+## 项目截图
+
+![登录页](images/1.png)
+
+![首页仪表盘](images/2.png)
+
+![设备管理](images/3.png)
+
 ## 技术栈
 
 - 前端：Vue 3 + Vue Router + Element Plus + ECharts + Axios
