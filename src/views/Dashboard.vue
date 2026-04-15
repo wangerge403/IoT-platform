@@ -127,58 +127,36 @@
         </el-col>
       </el-row>
       
-      <!-- 快捷操作和最近活动 -->
-      <el-row :gutter="20" class="activity-row">
-        <el-col :span="8">
-          <el-card class="quick-actions-card">
-            <template #header>
-              <div class="card-header">
-                <span>快捷操作</span>
+      <!-- 最近活动 -->
+      <el-card class="activity-card">
+        <template #header>
+          <div class="card-header">
+            <span>最近活动</span>
+            <el-button link size="small" style="color: #FF6700;">查看全部</el-button>
+          </div>
+        </template>
+        <div class="activity-list">
+          <div class="activity-item" v-for="(item, index) in recentActivities" :key="index">
+            <div class="activity-dot" :class="item.type"></div>
+            <div class="activity-body">
+              <div class="activity-top">
+                <span class="activity-user">{{ item.user }}</span>
+                <span class="activity-action">{{ item.action }}</span>
+                <el-tag size="small" effect="plain" round>{{ item.device }}</el-tag>
               </div>
-            </template>
-            <div class="quick-actions">
-              <div 
-                class="action-item" 
-                v-for="(action, index) in quickActions" 
-                :key="index"
-                @click="handleQuickAction(action)"
-              >
-                <div class="action-icon" :style="{ backgroundColor: action.color }">
-                  <el-icon>{{ action.icon }}</el-icon>
-                </div>
-                <div class="action-text">{{ action.name }}</div>
+              <div class="activity-time">
+                <el-icon><Clock /></el-icon> {{ item.time }}
               </div>
             </div>
-          </el-card>
-        </el-col>
-        
-        <el-col :span="16">
-          <el-card class="activity-card">
-            <template #header>
-              <div class="card-header">
-                <span>最近活动</span>
-              </div>
-            </template>
-            <el-table :data="recentActivities" style="width: 100%">
-              <el-table-column prop="time" label="时间" width="180">
-                <template #default="scope">
-                  <span class="time-text">{{ scope.row.time }}</span>
-                </template>
-              </el-table-column>
-              <el-table-column prop="user" label="用户" width="120" />
-              <el-table-column prop="action" label="操作" />
-              <el-table-column prop="device" label="设备" width="150" />
-            </el-table>
-          </el-card>
-        </el-col>
-      </el-row>
+          </div>
+        </div>
+      </el-card>
     </div>
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted, onBeforeUnmount, computed } from 'vue'
-import { ElMessage } from 'element-plus'
 import * as echarts from 'echarts'
 
 // 获取用户信息
@@ -203,44 +181,13 @@ const stats = ref({
   alarms: 2
 })
 
-// 快捷操作
-const quickActions = ref([
-  { name: '查看报警', icon: 'Bell', color: '#e6a23c' },
-  { name: '系统设置', icon: 'Setting', color: '#f56c6c' }
-])
-
 // 最近活动数据
 const recentActivities = ref([
-  {
-    time: '2023-10-01 14:30:22',
-    user: '管理员',
-    action: '开启客厅空调',
-    device: '客厅空调'
-  },
-  {
-    time: '2023-10-01 13:45:10',
-    user: '用户A',
-    action: '关闭主卧灯光',
-    device: '主卧吸顶灯'
-  },
-  {
-    time: '2023-10-01 12:20:05',
-    user: '管理员',
-    action: '设置观影模式',
-    device: '客厅设备组'
-  },
-  {
-    time: '2023-10-01 11:15:30',
-    user: '系统',
-    action: '检测到烟雾报警',
-    device: '客厅烟雾传感器'
-  },
-  {
-    time: '2023-10-01 10:30:15',
-    user: '用户B',
-    action: '打开次卧窗帘',
-    device: '次卧窗帘电机'
-  }
+  { time: '14:30:22', user: '管理员', action: '开启客厅空调', device: '客厅空调', type: 'success' },
+  { time: '13:45:10', user: '用户A', action: '关闭主卧灯光', device: '主卧吸顶灯', type: 'info' },
+  { time: '12:20:05', user: '管理员', action: '设置观影模式', device: '客厅设备组', type: 'success' },
+  { time: '11:15:30', user: '系统', action: '检测到烟雾报警', device: '烟雾传感器', type: 'danger' },
+  { time: '10:30:15', user: '用户B', action: '打开次卧窗帘', device: '窗帘电机', type: 'info' },
 ])
 
 // 图表引用
@@ -249,64 +196,74 @@ const typeChartRef = ref(null)
 let statusChart = null
 let typeChart = null
 
-// 处理快捷操作
-const handleQuickAction = (action) => {
-  ElMessage.info(`执行操作: ${action.name}`)
-}
-
 // 初始化图表
 const initCharts = () => {
-  // 设备状态统计图
+  // 设备状态统计图 - 面积折线图风格
   if (statusChartRef.value) {
     statusChart = echarts.init(statusChartRef.value)
     const statusOption = {
       tooltip: {
         trigger: 'axis',
-        axisPointer: {
-          type: 'shadow'
-        }
+        backgroundColor: 'rgba(255,255,255,0.95)',
+        borderColor: '#f0f0f0',
+        borderWidth: 1,
+        textStyle: { color: '#333', fontSize: 13 },
+        axisPointer: { type: 'cross', crossStyle: { color: '#ccc' } }
       },
-      grid: {
-        left: '3%',
-        right: '4%',
-        bottom: '3%',
-        containLabel: true
+      legend: {
+        top: 10,
+        right: 20,
+        textStyle: { color: '#999', fontSize: 12 },
+        itemWidth: 12,
+        itemHeight: 8,
+        itemGap: 16
       },
-      xAxis: [
-        {
-          type: 'category',
-          data: ['周一', '周二', '周三', '周四', '周五', '周六', '周日'],
-          axisTick: {
-            alignWithLabel: true
-          }
-        }
-      ],
-      yAxis: [
-        {
-          type: 'value'
-        }
-      ],
+      grid: { left: '3%', right: '4%', bottom: '3%', top: 50, containLabel: true },
+      xAxis: {
+        type: 'category',
+        data: ['周一', '周二', '周三', '周四', '周五', '周六', '周日'],
+        axisLine: { lineStyle: { color: '#e8e8e8' } },
+        axisTick: { show: false },
+        axisLabel: { color: '#999', fontSize: 12 }
+      },
+      yAxis: {
+        type: 'value',
+        splitLine: { lineStyle: { color: '#f5f5f5', type: 'dashed' } },
+        axisLine: { show: false },
+        axisTick: { show: false },
+        axisLabel: { color: '#999', fontSize: 12 }
+      },
       series: [
         {
           name: '在线设备',
-          type: 'bar',
-          barWidth: '60%',
+          type: 'line',
+          smooth: true,
+          symbol: 'circle',
+          symbolSize: 6,
           data: [10, 12, 11, 13, 12, 14, 12],
-          itemStyle: {
+          lineStyle: { color: '#FF6700', width: 3 },
+          itemStyle: { color: '#FF6700', borderColor: '#fff', borderWidth: 2 },
+          areaStyle: {
             color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-              { offset: 0, color: '#83bff6' },
-              { offset: 0.5, color: '#188df0' },
-              { offset: 1, color: '#188df0' }
+              { offset: 0, color: 'rgba(255,103,0,0.25)' },
+              { offset: 1, color: 'rgba(255,103,0,0.02)' }
             ])
-          },
-          emphasis: {
-            itemStyle: {
-              color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-                { offset: 0, color: '#2378f7' },
-                { offset: 0.7, color: '#2378f7' },
-                { offset: 1, color: '#83bff6' }
-              ])
-            }
+          }
+        },
+        {
+          name: '离线设备',
+          type: 'line',
+          smooth: true,
+          symbol: 'circle',
+          symbolSize: 6,
+          data: [5, 3, 4, 2, 3, 1, 3],
+          lineStyle: { color: '#ccc', width: 2, type: 'dashed' },
+          itemStyle: { color: '#ccc', borderColor: '#fff', borderWidth: 2 },
+          areaStyle: {
+            color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+              { offset: 0, color: 'rgba(200,200,200,0.15)' },
+              { offset: 1, color: 'rgba(200,200,200,0.01)' }
+            ])
           }
         }
       ]
@@ -314,48 +271,57 @@ const initCharts = () => {
     statusChart.setOption(statusOption)
   }
   
-  // 设备类型分布图
+  // 设备类型分布图 - 南丁格尔玫瑰图
   if (typeChartRef.value) {
     typeChart = echarts.init(typeChartRef.value)
     const typeOption = {
       tooltip: {
-        trigger: 'item'
+        trigger: 'item',
+        backgroundColor: 'rgba(255,255,255,0.95)',
+        borderColor: '#f0f0f0',
+        borderWidth: 1,
+        textStyle: { color: '#333', fontSize: 13 },
+        formatter: '{b}: {c} 台 ({d}%)'
       },
       legend: {
-        bottom: '0',
-        left: 'center'
+        bottom: 0,
+        left: 'center',
+        textStyle: { color: '#999', fontSize: 12 },
+        itemWidth: 10,
+        itemHeight: 10,
+        itemGap: 12
       },
+      color: ['#FF6700', '#FF9800', '#4CAF50', '#2196F3', '#9C27B0', '#607D8B'],
       series: [
         {
           name: '设备类型',
           type: 'pie',
-          radius: ['40%', '70%'],
-          avoidLabelOverlap: false,
+          radius: ['30%', '65%'],
+          center: ['50%', '45%'],
+          roseType: 'radius',
           itemStyle: {
-            borderRadius: 10,
+            borderRadius: 6,
             borderColor: '#fff',
-            borderWidth: 2
+            borderWidth: 3
           },
           label: {
-            show: false,
-            position: 'center'
-          },
-          emphasis: {
-            label: {
-              show: true,
-              fontSize: '18',
-              fontWeight: 'bold'
-            }
+            show: true,
+            fontSize: 11,
+            color: '#666',
+            formatter: '{b}\n{d}%'
           },
           labelLine: {
-            show: false
+            length: 10,
+            length2: 12,
+            lineStyle: { color: '#ddd' }
           },
           data: [
             { value: 8, name: '灯光' },
             { value: 3, name: '空调' },
             { value: 2, name: '门锁' },
             { value: 2, name: '窗帘' },
-            { value: 10, name: '传感器' }
+            { value: 10, name: '传感器' },
+            { value: 1, name: '咖啡机' }
           ]
         }
       ]
@@ -590,67 +556,72 @@ onBeforeUnmount(() => {
   height: 100%;
 }
 
-/* 快捷操作 */
-.quick-actions-card {
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-  border: 1px solid #f0f0f0;
-  height: 100%;
-}
-
-.quick-actions {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 20px;
-  padding: 10px;
-}
-
-.action-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 15px;
-  border-radius: 12px;
-  background: #f5f7fa;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.action-item:hover {
-  background: #FFF3E0;
-  transform: translateY(-2px);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-}
-
-.action-icon {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 10px;
-  color: white;
-  font-size: 18px;
-}
-
-.action-text {
-  font-size: 14px;
-  color: #606266;
-  font-weight: 500;
-}
-
 /* 活动卡片 */
 .activity-card {
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
   border: 1px solid #f0f0f0;
-  height: 100%;
 }
 
-.time-text {
-  color: #909399;
+.activity-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.activity-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 14px 0;
+  border-bottom: 1px solid #f8f8f8;
+  position: relative;
+}
+
+.activity-item:last-child {
+  border-bottom: none;
+}
+
+.activity-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  margin-top: 6px;
+  flex-shrink: 0;
+}
+
+.activity-dot.success { background: #4CAF50; box-shadow: 0 0 6px rgba(76,175,80,0.3); }
+.activity-dot.info { background: #2196F3; box-shadow: 0 0 6px rgba(33,150,243,0.3); }
+.activity-dot.danger { background: #f44336; box-shadow: 0 0 6px rgba(244,67,54,0.3); }
+
+.activity-body {
+  flex: 1;
+}
+
+.activity-top {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 4px;
+}
+
+.activity-user {
+  font-size: 13px;
+  font-weight: 500;
+  color: #333;
+}
+
+.activity-action {
+  font-size: 13px;
+  color: #666;
+}
+
+.activity-time {
   font-size: 12px;
+  color: #bbb;
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
 
 /* 响应式设计 */

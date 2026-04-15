@@ -43,16 +43,6 @@
             <template #title>系统设置</template>
           </el-menu-item>
         </el-menu>
-        <div class="sidebar-footer" v-if="!isCollapse">
-          <div class="info-item">
-            <el-icon><Connection /></el-icon>
-            <span>在线: {{ onlineDevices }}</span>
-          </div>
-          <div class="info-item">
-            <el-icon><Warning /></el-icon>
-            <span>报警: {{ alarmCount }}</span>
-          </div>
-        </div>
       </el-aside>
       <el-container class="content-container">
         <el-header class="header">
@@ -70,6 +60,16 @@
             </el-breadcrumb>
           </div>
           <div class="header-right">
+            <div class="header-stats">
+              <div class="header-stat online">
+                <span class="stat-dot"></span>
+                <span>在线 {{ onlineDevices }}</span>
+              </div>
+              <div class="header-stat alarm" @click="router.push('/alarms')">
+                <span class="stat-dot"></span>
+                <span>报警 {{ alarmCount }}</span>
+              </div>
+            </div>
             <el-popover placement="bottom-end" :width="320" trigger="click">
               <template #reference>
                 <el-badge :value="notifications.filter(n => !n.read).length || undefined" :max="99">
@@ -312,23 +312,6 @@ const logout = () => { localStorage.removeItem('user'); router.push('/') }
   font-size: 18px;
 }
 
-/* 底部信息 */
-.sidebar-footer {
-  padding: 12px 16px;
-  border-top: 1px solid #f0f0f0;
-  font-size: 12px;
-  color: #999;
-}
-.info-item {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  margin-bottom: 6px;
-}
-.info-item:last-child {
-  margin-bottom: 0;
-}
-
 /* 头部 */
 .header {
   height: 56px !important;
@@ -351,6 +334,49 @@ const logout = () => { localStorage.removeItem('user'); router.push('/') }
   display: flex;
   align-items: center;
   gap: 16px;
+}
+
+/* 头部状态指示器 */
+.header-stats {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.header-stat {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: 16px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: default;
+}
+.header-stat.online {
+  background: #E8F5E9;
+  color: #2E7D32;
+}
+.header-stat.alarm {
+  background: #FFF3E0;
+  color: #E65100;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.header-stat.alarm:hover {
+  background: #FFE0B2;
+}
+.stat-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+.header-stat.online .stat-dot {
+  background: #4CAF50;
+  box-shadow: 0 0 4px rgba(76,175,80,0.5);
+}
+.header-stat.alarm .stat-dot {
+  background: #FF6700;
+  box-shadow: 0 0 4px rgba(255,103,0,0.5);
 }
 .user-dropdown {
   display: flex;
