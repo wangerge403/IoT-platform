@@ -3,6 +3,7 @@ import cors from 'cors';
 import authRouter from './routes/auth.js';
 import deviceRouter from './routes/device.js';
 import emailRouter from './routes/email.js';
+import permissionRouter from './routes/permission.js';
 
 const app = express();
 
@@ -16,6 +17,7 @@ app.use(express.json());
 app.use(authRouter);
 app.use(deviceRouter);
 app.use(emailRouter);
+app.use(permissionRouter);
 
 // 启动服务
 app.listen(8082, () => {

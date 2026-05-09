@@ -42,6 +42,10 @@
             <el-icon><Setting /></el-icon>
             <template #title>系统设置</template>
           </el-menu-item>
+          <el-menu-item index="/permissions">
+            <el-icon><Key /></el-icon>
+            <template #title>权限管理</template>
+          </el-menu-item>
         </el-menu>
       </el-aside>
       <el-container class="content-container">
@@ -109,8 +113,8 @@
                   <el-icon :size="18"><UserFilled /></el-icon>
                 </el-avatar>
                 <div class="user-meta">
-                  <span class="uname">{{ user?.nickname || user?.username }}</span>
-                  <span class="urole">管理员</span>
+                    <span class="uname">{{ user?.nickname || user?.username }}</span>
+                    <span class="urole">{{ user?.roleName || '用户' }}</span>
                 </div>
                 <el-icon class="arrow-icon"><ArrowDown /></el-icon>
               </span>
@@ -187,7 +191,8 @@ const breadcrumbItems = computed(() => {
     '/devices': ['设备管理'],
     '/alarms': ['报警信息'],
     '/analytics': ['数据分析'],
-    '/settings': ['系统设置']
+    '/settings': ['系统设置'],
+    '/permissions': ['权限管理']
   }
   return map[route.path] || ['首页']
 })

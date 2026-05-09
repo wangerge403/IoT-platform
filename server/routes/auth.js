@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { users } from '../store/index.js';
+import { users, roles } from '../store/index.js';
 
 const router = Router();
 
@@ -9,12 +9,17 @@ router.get('/login', (req, res) => {
   const user = users.find(u => u.username === username && u.password === password);
 
   if (user) {
+    const role = roles.find(r => r.key === user.role) || roles.find(r => r.key === 'viewer');
     res.json({
       code: 200,
       msg: '登录成功',
       data: {
         username: user.username,
         nickname: user.nickname,
+        email: user.email,
+        phone: user.phone,
+        role: user.role || 'viewer',
+        roleName: role.label,
         token: Math.random().toString(36)
       }
     });
@@ -32,7 +37,7 @@ router.post('/register', (req, res) => {
     return res.json({ code: 400, msg: '用户名已存在' });
   }
 
-  users.push({ username, nickname, password, email, phone, isActive });
+  users.push({ username, nickname, password, email, phone, isActive, role: 'viewer' });
   res.json({ code: 200, msg: '注册成功' });
 });
 
